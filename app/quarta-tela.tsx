@@ -6,9 +6,15 @@ import api from '@/services/Api';
 
 export default function QuartaTela() {
   const router = useRouter();
-  const [usuario, setusuario] = useState()
+  const [usuario, setusuario] = useState('')
   
-  const imageUrl = usuario ? api.get(`${usuario}`) : null
+  const imageUrl = 'https://api.dicebear.com/9.x/initials/svg?seed='+usuario
+
+
+
+   
+
+  //const imageUrl = usuario ? api.get(`${usuario}`) : null
   return (   
     <View style={styles.container}>
       {imageUrl ? (
@@ -24,11 +30,10 @@ export default function QuartaTela() {
         contentFit="cover"
       />
       )}
-      
 
       <View style={styles.inputGroup}>
         <Text style={styles.label}>Usuário</Text>
-        <TextInput onChangeText={setusuario} style={styles.input} />
+        <TextInput onChangeText={setusuario} style={styles.input}/>
       </View>
 
       <View style={styles.inputGroup}>
@@ -44,7 +49,7 @@ export default function QuartaTela() {
       <View style={styles.enter}>
         <Pressable onPress={()=> router.push('/terceira_tela')}>
           <Image
-            source={require('../assets/images/arrow.png')}
+            source={require('../assets/images/logoBuks.png')}
             style={styles.image1}
             contentFit="cover"
           />
