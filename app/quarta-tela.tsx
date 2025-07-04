@@ -1,39 +1,29 @@
-import { View, Text, StyleSheet, TextInput, Pressable } from 'react-native';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import api from '@/services/Api';
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 export default function QuartaTela() {
   const router = useRouter();
-  const [usuario, setusuario] = useState('')
-  
-  const imageUrl = 'https://api.dicebear.com/9.x/initials/svg?seed='+usuario
+  const [usuario, setusuario] = useState('');
 
+  const imageUrl = 'https://api.dicebear.com/9.x/initials/svg?seed=' + usuario;
 
-
-   
-
-  //const imageUrl = usuario ? api.get(`${usuario}`) : null
   return (   
     <View style={styles.container}>
-      {imageUrl ? (
+      {usuario ? (
         <Image
-        source={{ uri: imageUrl}}
-        style={styles.image}
-        contentFit="cover"
-      />
+          source={{ uri: imageUrl }}
+          style={styles.image}
+          contentFit="cover"
+        />
       ) : (
-        <Image
-        source={require('../assets/images/Frame.png')}
-        style={styles.image}
-        contentFit="cover"
-      />
+        <View style={[styles.image, { backgroundColor: '#243A69', borderRadius: 60 }]} />
       )}
-
+ 
       <View style={styles.inputGroup}>
         <Text style={styles.label}>Usuário</Text>
-        <TextInput onChangeText={setusuario} style={styles.input}/>
+        <TextInput onChangeText={setusuario} style={styles.input} />
       </View>
 
       <View style={styles.inputGroup}>
@@ -47,9 +37,9 @@ export default function QuartaTela() {
       </View>
 
       <View style={styles.enter}>
-        <Pressable onPress={()=> router.push('/terceira_tela')}>
+        <Pressable onPress={() => router.push('/terceira_tela')}>
           <Image
-            source={require('../assets/images/logoBuks.png')}
+            source={require('../assets/images/arrow.png')}
             style={styles.image1}
             contentFit="cover"
           />
