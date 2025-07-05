@@ -1,11 +1,7 @@
-import * as AuthSession from 'expo-auth-session';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-
-console.log(AuthSession.makeRedirectUri({ useProxy: true }));
-
 
 export default function SegundaTela() {
   const router = useRouter(); 
@@ -15,11 +11,11 @@ export default function SegundaTela() {
 
   return (
     <View style={styles.container}>
-    
+  
       <View style={styles.mode}>
-        <Pressable onPress={() => router.push('/primeira-tela-e')}>
+        <Pressable onPress={() => router.push('/')}>
           <Image
-            source={require('../assets/images/moon.png')}
+            source={require('../assets/images/sun.png')}
             style={styles.image1}
             contentFit="cover"
           />
@@ -27,12 +23,13 @@ export default function SegundaTela() {
       </View>
       {usuario ? (
         <Image
-          source={{ uri: imageUrl }}
-          style={styles.image}
-          contentFit="cover"
+            source={{ uri: imageUrl }}
+            style={styles.image}
+            contentFit="cover"
         />
+
       ) : (
-        <View style={[styles.image, { backgroundColor: '#243A69', borderRadius: 60 }]} />
+        <View style={[styles.image, { backgroundColor: '#191013', borderRadius: 60 , alignItems: 'center',}]} />
       )}
 
       <View style={styles.inputGroup}>
@@ -49,7 +46,7 @@ export default function SegundaTela() {
       </View>
 
       <View style={styles.enter}>
-        <Pressable onPress={() => router.push('/terceira_tela')}>
+        <Pressable onPress={() => router.push('/terceira-tela-e')}>
           <Image
             source={require('../assets/images/arrow.png')}
             style={styles.image1}
@@ -60,7 +57,7 @@ export default function SegundaTela() {
 
       <View style={styles.group}>
         <Text style={styles.label}>Não tem conta?</Text>
-        <Pressable onPress={() => router.push('/quarta-tela')}>
+        <Pressable onPress={() => router.push('/quarta-tela-e')}>
           <Text style={styles.textoBotao}>Clique aqui</Text>
         </Pressable>
       </View>
@@ -73,11 +70,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#243A69',
+    backgroundColor: '#191013',
     gap: 25,
     paddingHorizontal: 20,
     //width: 426,
-    //alignSelf: 'center'  
+    //alignSelf: 'center' 
   },
   image: {
     width: 120,

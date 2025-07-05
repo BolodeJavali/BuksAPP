@@ -6,7 +6,7 @@ export default function HomeScreen() {
   const router = useRouter();
 
   const handlePress = () => {
-    router.push('/segunda-tela');
+    router.push('/segunda-tela-e');
   };
 
   return (
@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#243A69',
+    backgroundColor: '#191013',
     //width: 426,
     //alignSelf: 'center' 
   },

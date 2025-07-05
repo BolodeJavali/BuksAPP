@@ -11,7 +11,7 @@ export default function TerceiraTela() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#243A69',
+    backgroundColor: '#191013',
     justifyContent: 'center',
     alignItems: 'center',
     //width: 426,

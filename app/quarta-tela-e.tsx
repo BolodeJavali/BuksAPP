@@ -1,30 +1,25 @@
-import * as AuthSession from 'expo-auth-session';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
-console.log(AuthSession.makeRedirectUri({ useProxy: true }));
-
-
-export default function SegundaTela() {
-  const router = useRouter(); 
-  const [usuario, setUsuario] = useState('');
+export default function QuartaTela() {
+  const router = useRouter();
+  const [usuario, setusuario] = useState('');
 
   const imageUrl = 'https://api.dicebear.com/9.x/initials/png?seed=' + usuario + '&padding=20';
 
-  return (
+  return (   
     <View style={styles.container}>
-    
       <View style={styles.mode}>
-        <Pressable onPress={() => router.push('/primeira-tela-e')}>
-          <Image
-            source={require('../assets/images/moon.png')}
-            style={styles.image1}
-            contentFit="cover"
-          />
-        </Pressable>
-      </View>
+              <Pressable onPress={() => router.push('/')}>
+                <Image
+                  source={require('../assets/images/sun.png')}
+                  style={styles.image1}
+                  contentFit="cover"
+                />
+              </Pressable>
+            </View>
       {usuario ? (
         <Image
           source={{ uri: imageUrl }}
@@ -32,36 +27,31 @@ export default function SegundaTela() {
           contentFit="cover"
         />
       ) : (
-        <View style={[styles.image, { backgroundColor: '#243A69', borderRadius: 60 }]} />
+        <View style={[styles.image, { backgroundColor: '#191013', borderRadius: 60 }]} />
       )}
-
+ 
       <View style={styles.inputGroup}>
         <Text style={styles.label}>Usuário</Text>
-        <TextInput 
-          style={styles.input} 
-          onChangeText={setUsuario} 
-        />
+        <TextInput onChangeText={setusuario} style={styles.input} />
       </View>
-  
+
       <View style={styles.inputGroup}>
         <Text style={styles.label}>Senha</Text>
         <TextInput style={styles.input} secureTextEntry />
       </View>
 
+      <View style={styles.inputGroup}>
+        <Text style={styles.label}>Confirme sua senha</Text>
+        <TextInput style={styles.input} secureTextEntry />
+      </View>
+
       <View style={styles.enter}>
-        <Pressable onPress={() => router.push('/terceira_tela')}>
+        <Pressable onPress={() => router.push('/terceira-tela-e')}>
           <Image
             source={require('../assets/images/arrow.png')}
             style={styles.image1}
             contentFit="cover"
           />
-        </Pressable>
-      </View>
-
-      <View style={styles.group}>
-        <Text style={styles.label}>Não tem conta?</Text>
-        <Pressable onPress={() => router.push('/quarta-tela')}>
-          <Text style={styles.textoBotao}>Clique aqui</Text>
         </Pressable>
       </View>
     </View>
@@ -73,11 +63,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#243A69',
+    backgroundColor: '#191013',
     gap: 25,
     paddingHorizontal: 20,
-    //width: 426,
-    //alignSelf: 'center'  
+    ///width: 426,
+    //alignSelf: 'center' 
   },
   image: {
     width: 120,
@@ -108,21 +98,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     alignSelf: 'center',
-    marginBottom: -15,
+    marginTop: 20,
   },
   image1: {
     width: 30,
     height: 30,
-  },
-  group: {
-    alignItems: 'center',
-    gap: 5,
-    marginTop: 15,
-  },
-  textoBotao: {
-    textDecorationLine: 'underline',
-    fontSize: 12,
-    color: '#D4CDC5',
   },
   mode: {
     backgroundColor: "#D4CDC5",
@@ -133,6 +113,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignSelf: 'flex-end',
     marginTop: -25,
-    marginRight:45
-  }
+    marginRight:45,  },
 });

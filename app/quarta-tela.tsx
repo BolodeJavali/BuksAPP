@@ -7,48 +7,57 @@ export default function QuartaTela() {
   const router = useRouter();
   const [usuario, setusuario] = useState('');
 
-  const imageUrl = 'https://api.dicebear.com/9.x/initials/svg?seed=' + usuario;
+  const imageUrl = 'https://api.dicebear.com/9.x/initials/png?seed=' + usuario + '&padding=20';
 
-  return (   
-    <View style={styles.container}>
-      {usuario ? (
+return (   
+  <View style={styles.container}>
+    <View style={styles.mode}>
+      <Pressable onPress={() => router.push('/primeira-tela-e')}>
         <Image
-          source={{ uri: imageUrl }}
-          style={styles.image}
+          source={require('../assets/images/moon.png')}
+          style={styles.image1}
           contentFit="cover"
         />
-      ) : (
-        <View style={[styles.image, { backgroundColor: '#243A69', borderRadius: 60 }]} />
-      )}
- 
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>Usuário</Text>
-        <TextInput onChangeText={setusuario} style={styles.input} />
-      </View>
-
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>Senha</Text>
-        <TextInput style={styles.input} secureTextEntry />
-      </View>
-
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>Confirme sua senha</Text>
-        <TextInput style={styles.input} secureTextEntry />
-      </View>
-
-      <View style={styles.enter}>
-        <Pressable onPress={() => router.push('/terceira_tela')}>
-          <Image
-            source={require('../assets/images/arrow.png')}
-            style={styles.image1}
-            contentFit="cover"
-          />
-        </Pressable>
-      </View>
+      </Pressable>
     </View>
-  );
-}
 
+    {usuario ? (
+      <Image
+        source={{ uri: imageUrl }}
+        style={styles.image}
+        contentFit="cover"
+      />
+    ) : (
+      <View style={[styles.image, { backgroundColor: '#243A69', borderRadius: 60 }]} />
+    )}
+
+    <View style={styles.inputGroup}>
+      <Text style={styles.label}>Usuário</Text>
+      <TextInput onChangeText={setusuario} style={styles.input} />
+    </View>
+
+    <View style={styles.inputGroup}>
+      <Text style={styles.label}>Senha</Text>
+      <TextInput style={styles.input} secureTextEntry />
+    </View>
+
+    <View style={styles.inputGroup}>
+      <Text style={styles.label}>Confirme sua senha</Text>
+      <TextInput style={styles.input} secureTextEntry />
+    </View>
+
+    <View style={styles.enter}>
+      <Pressable onPress={() => router.push('/terceira_tela')}>
+        <Image
+          source={require('../assets/images/arrow.png')}
+          style={styles.image1}
+          contentFit="cover"
+        />
+      </Pressable>
+    </View>
+  </View>
+);
+}
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -57,6 +66,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#243A69',
     gap: 25,
     paddingHorizontal: 20,
+    //width: 426,
+    //alignSelf: 'center' 
   },
   image: {
     width: 120,
@@ -93,4 +104,15 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
   },
+  mode: {
+    backgroundColor: "#D4CDC5",
+    width: 50,
+    height: 50,
+    borderRadius: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'flex-end',
+    marginTop: -25,
+    marginRight:45
+  }
 });
