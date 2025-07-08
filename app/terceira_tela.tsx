@@ -12,12 +12,22 @@ import {
 } from 'react-native';
 import { useUser } from '../context/UserContext';
 
-const categorias = ['Terror', 'Mangá', 'Romance', 'Drama', 'Aventura'];
+const categorias = [
+  'Ação', 'Aventura', 'Biografia', 'Clássico', 'Comédia', 'Conto',
+  'Crime', 'Crônica', 'Drama', 'Erótico', 'Fantasia',
+  'Ficção científica', 'História', 'Infantojuvenil',
+  'LGBTQIA+', 'Literatura brasileira', 'Mistério',
+  'Poesia', 'Policial',
+  'Psicologia', 'Religião', 'Romance', 
+  'Suspense', 'Terror'
+];
 
 export default function TerceiraTela() {
   const { usuario } = useUser();
-  const router = useRouter(); 
+  const router = useRouter();
+
   const [query, setQuery] = useState('');
+  const [resultadosBusca, setResultadosBusca] = useState([]);
   const [livrosPorCategoria, setLivrosPorCategoria] = useState({});
 
   const imageUrl = 'https://api.dicebear.com/9.x/initials/png?seed=' + (usuario || 'Anon') + '&padding=20';
@@ -47,6 +57,20 @@ export default function TerceiraTela() {
 
     carregarCategorias();
   }, []);
+
+  useEffect(() => {
+    const buscar = async () => {
+      if (query.trim() === '') {
+        setResultadosBusca([]);
+        return;
+      }
+
+      const livros = await buscarLivros(query);
+      setResultadosBusca(livros);
+    };
+
+    buscar();
+  }, [query]);
 
   return (
     <View style={styles.container}>
@@ -78,27 +102,48 @@ export default function TerceiraTela() {
       </View>
 
       <ScrollView style={styles.scroll}>
-        {categorias.map((categoria) => (
-          <View key={categoria} style={styles.categoria}>
-            <Text style={styles.categoriaTitulo}>{categoria}</Text>
-            <FlatList
-              data={livrosPorCategoria[categoria] || []}
-              keyExtractor={(item) => item.id}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              renderItem={({ item }) => {
-                const volume = item.volumeInfo;
-                return volume.imageLinks?.thumbnail ? (
-                  <Image
-                    source={{ uri: volume.imageLinks.thumbnail }}
-                    style={styles.livroCapa}
-                  />
-                ) : null;
-              }}
+  {query.trim() !== '' && resultadosBusca.length > 0 && (
+    <View style={styles.categoria}>
+      <Text style={styles.categoriaTitulo}>Resultados da busca</Text>
+      <FlatList
+        data={resultadosBusca}
+        keyExtractor={(item) => item.id}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        renderItem={({ item }) => {
+          const volume = item.volumeInfo;
+          return volume.imageLinks?.thumbnail ? (
+            <Image
+              source={{ uri: volume.imageLinks.thumbnail }}
+              style={styles.livroCapa}
             />
-          </View>
-        ))}
-      </ScrollView>
+          ) : null;
+        }}
+      />
+    </View>
+  )}
+
+  {categorias.map((categoria) => (
+    <View key={categoria} style={styles.categoria}>
+      <Text style={styles.categoriaTitulo}>{categoria}</Text>
+      <FlatList
+        data={livrosPorCategoria[categoria] || []}
+        keyExtractor={(item) => item.id}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        renderItem={({ item }) => {
+          const volume = item.volumeInfo;
+          return volume.imageLinks?.thumbnail ? (
+            <Image
+              source={{ uri: volume.imageLinks.thumbnail }}
+              style={styles.livroCapa}
+            />
+          ) : null;
+        }}
+      />
+    </View>
+  ))}
+</ScrollView>
     </View>
   );
 }
