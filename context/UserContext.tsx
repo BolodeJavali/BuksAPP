@@ -1,25 +1,16 @@
-import { createContext, ReactNode, useContext, useState } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 
-type UserContextType = {
-  usuario: string;
-  setUsuario: (nome: string) => void;
-};
+const UserContext = createContext(null);
 
-const UserContext = createContext<UserContextType | undefined>(undefined);
+export const UserProvider = ({ children }) => {
+  const [token, setToken] = useState(null);
+  const [user, setUser] = useState(null);
 
-export function UserProvider({ children }: { children: ReactNode }) {
-  const [usuario, setUsuario] = useState('');
   return (
-    <UserContext.Provider value={{ usuario, setUsuario }}>
+    <UserContext.Provider value={{ token, setToken, user, setUser }}>
       {children}
     </UserContext.Provider>
   );
-}
+};
 
-export function useUser() {
-  const context = useContext(UserContext);
-  if (!context) {
-    throw new Error('useUser precisa estar dentro do UserProvider');
-  }
-  return context;
-}
+export const useUser = () => useContext(UserContext);
