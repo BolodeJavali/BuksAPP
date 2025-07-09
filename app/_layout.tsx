@@ -1,10 +1,10 @@
-import { Stack } from 'expo-router';
+import { Slot } from 'expo-router';
 import { UserProvider } from '../context/UserContext';
 
-export default function RootLayout() {
+export default function Layout() {
   return (
     <UserProvider>
-      <Stack />
+      <Slot />
     </UserProvider>
   );
 }
