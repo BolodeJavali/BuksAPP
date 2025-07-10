@@ -4,69 +4,72 @@ import {
   FlatList,
   Image,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
-  View
+  View,
 } from 'react-native';
 import { useUser } from '../context/UserContext';
 
-const categorias = ['Terror', 'Mangá', 'Romance', 'Drama', 'Aventura'];
+const categorias = [
+  'Ação', 'Aventura', 'Biografia', 'Clássico', 'Comédia', 'Conto',
+  'Crime', 'Crônica', 'Drama', 'Erótico', 'Fantasia',
+];
 
 export default function TerceiraTela() {
-  const { usuario } = useUser();
-  const router = useRouter(); 
+  const { usuario, avatarUrl } = useUser();
+  const router = useRouter();
+
   const [query, setQuery] = useState('');
-  const [livrosPorCategoria, setLivrosPorCategoria] = useState({});
+  const [resultadosBusca, setResultadosBusca] = useState<any[]>([]);
+  const [livrosPorCategoria, setLivrosPorCategoria] =
+    useState<Record<string, any[]>>({});
 
-  const imageUrl = 'https://api.dicebear.com/9.x/initials/png?seed=' + (usuario || 'Anon') + '&padding=20';
-
+  /* ------------------ helpers ------------------ */
   const buscarLivros = async (termo: string) => {
     try {
-      const response = await fetch(
-        `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(termo)}`
+      const res = await fetch(
+        `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(
+          termo
+        )}`
       );
-      const data = await response.json();
+      const data = await res.json();
       return data.items || [];
-    } catch (error) {
-      console.error('Erro ao buscar livros:', error);
+    } catch (e) {
+      console.error(e);
       return [];
     }
   };
 
+  /* carrega listas por categoria */
   useEffect(() => {
-    const carregarCategorias = async () => {
-      const resultados = {};
-      for (const categoria of categorias) {
-        const livros = await buscarLivros(categoria);
-        resultados[categoria] = livros;
-      }
-      setLivrosPorCategoria(resultados);
-    };
-
-    carregarCategorias();
+    (async () => {
+      const res: Record<string, any[]> = {};
+      for (const cat of categorias) res[cat] = await buscarLivros(cat);
+      setLivrosPorCategoria(res);
+    })();
   }, []);
 
+  /* busca pelo texto digitado */
+  useEffect(() => {
+    if (!query.trim()) return setResultadosBusca([]);
+    (async () => setResultadosBusca(await buscarLivros(query)))();
+  }, [query]);
+
+  /* ------------------ ui ------------------ */
   return (
     <View style={styles.container}>
+      {/* cabeçalho simples */}
       <View style={styles.setusuario}>
         <View style={styles.usuarioInfo}>
-          <Image source={{ uri: imageUrl }} style={styles.avatar} />
-          <Text style={styles.nome}>Olá, {usuario || 'visitante'}!</Text>
-        </View>
-
-        <View style={styles.mode}>
-          <Pressable onPress={() => router.push('/primeira-tela-e')}>
-            <Image
-              source={require('../assets/images/moon.png')}
-              style={styles.image1}
-              contentFit="cover"
-            />
-          </Pressable>
+          <Image source={{ uri: avatarUrl }} style={styles.avatar} />
+          <Text style={styles.texto}>
+            Bem‑vindo, {usuario || 'visitante'}!
+          </Text>
         </View>
       </View>
 
+      {/* campo de busca */}
       <View style={styles.searchContainer}>
         <TextInput
           style={styles.searchInput}
@@ -77,98 +80,94 @@ export default function TerceiraTela() {
         />
       </View>
 
-      <ScrollView style={styles.scroll}>
-        {categorias.map((categoria) => (
-          <View key={categoria} style={styles.categoria}>
-            <Text style={styles.categoriaTitulo}>{categoria}</Text>
-            <FlatList
-              data={livrosPorCategoria[categoria] || []}
-              keyExtractor={(item) => item.id}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              renderItem={({ item }) => {
-                const volume = item.volumeInfo;
-                return volume.imageLinks?.thumbnail ? (
-                  <Image
-                    source={{ uri: volume.imageLinks.thumbnail }}
-                    style={styles.livroCapa}
-                  />
-                ) : null;
-              }}
-            />
-          </View>
-        ))}
-      </ScrollView>
+      {/* listas horizontais */}
+      <FlatList
+        data={[{ titulo: 'Resultados', dados: resultadosBusca }, ...categorias.map(c => ({ titulo: c, dados: livrosPorCategoria[c] || [] }))]}
+        keyExtractor={(item) => item.titulo}
+        renderItem={({ item }) =>
+          item.titulo === 'Resultados' && query.trim() === ''
+            ? null
+            : (
+              <ListaHorizontal
+                titulo={item.titulo === 'Resultados' ? 'Resultados da busca' : item.titulo}
+                dados={item.dados}
+                onPressItem={(id) =>
+                  router.push({ pathname: '/detalhes/[id]', params: { id } })
+                }
+              />
+            )
+        }
+      />
     </View>
   );
 }
 
+/* ---------- componente auxiliar ---------- */
+function ListaHorizontal({
+  titulo,
+  dados,
+  onPressItem,
+}: {
+  titulo: string;
+  dados: any[];
+  onPressItem: (id: string) => void;
+}) {
+  if (!dados.length) return null;
+
+  return (
+    <View style={styles.categoria}>
+      <Text style={styles.categoriaTitulo}>{titulo}</Text>
+      <FlatList
+        data={dados}
+        keyExtractor={(item) => item.id}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        initialNumToRender={6}
+        renderItem={({ item }) =>
+          item.volumeInfo.imageLinks?.thumbnail ? (
+            <Pressable onPress={() => onPressItem(item.id)}>
+              <Image
+                source={{ uri: item.volumeInfo.imageLinks.thumbnail }}
+                style={styles.livroCapa}
+              />
+            </Pressable>
+          ) : null
+        }
+      />
+    </View>
+  );
+}
+
+/* ---------- estilos ---------- */
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#243A69',
-  },
+  container: { flex: 1, backgroundColor: '#243A69' },
+
+  /* cabeçalho */
   setusuario: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginHorizontal: 25,
-    marginVertical: 25,
+    padding: 20,
   },
-  usuarioInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-  },
-  nome: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-  mode: {
-    backgroundColor: '#D4CDC5',
-    width: 50,
-    height: 50,
-    borderRadius: 15,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  image1: {
-    width: 30,
-    height: 30,
-  },
-  searchContainer: {
-    paddingHorizontal: 20,
-    paddingBottom: 10,
-  },
+  usuarioInfo: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  avatar: { width: 60, height: 60, borderRadius: 30 },
+  texto: { color: '#D4CDC5', fontSize: 16 },
+
+  /* busca */
+  searchContainer: { paddingHorizontal: 20, paddingBottom: 10 },
   searchInput: {
     backgroundColor: '#fff',
     borderRadius: 20,
     paddingHorizontal: 20,
     paddingVertical: 8,
   },
-  scroll: {
-    paddingHorizontal: 16,
-  },
-  categoria: {
-    marginBottom: 20,
-  },
+
+  /* listas */
+  categoria: { marginBottom: 24, paddingLeft: 16 },
   categoriaTitulo: {
-    fontSize: 16,
     color: '#fff',
-    marginBottom: 10,
-    marginLeft: 4,
+    fontSize: 16,
     fontWeight: 'bold',
+    marginBottom: 8,
   },
-  livroCapa: {
-    width: 100,
-    height: 150,
-    marginRight: 10,
-    borderRadius: 6,
-  },
+  livroCapa: { width: 100, height: 150, marginRight: 10, borderRadius: 6 },
 });

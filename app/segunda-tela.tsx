@@ -1,44 +1,39 @@
-import * as AuthSession from 'expo-auth-session';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useUser } from '../context/UserContext';
-
-console.log(AuthSession.makeRedirectUri({ useProxy: true }));
-
 export default function SegundaTela() {
-  const router = useRouter();
-  const { usuario, setUsuario } = useUser(); // ← pegando o nome do contexto
-
-  const imageUrl = 'https://api.dicebear.com/9.x/initials/png?seed=' + usuario + '&padding=20';
+  const router = useRouter(); 
+  const { usuario, setUsuario, avatarUrl } = useUser(); 
 
   return (
     <View style={styles.container}>
       <View style={styles.mode}>
-        <Pressable onPress={() => router.push('/primeira-tela-e')}>
+        <Pressable onPress={() => router.push('/segunda-tela-e')}>
           <Image
-            source={require('../assets/images/moon.png')}
-            style={styles.image1}
-            contentFit="cover"
+              source={require('../assets/images/moon.png')}
+              style={styles.image1}
+              contentFit="cover"
           />
-        </Pressable>
+          </Pressable>
       </View>
 
       {usuario ? (
         <Image
-          source={{ uri: imageUrl }}
+          source={{ uri: avatarUrl }}
           style={styles.image}
           contentFit="cover"
         />
       ) : (
-        <View style={[styles.image, { backgroundColor: '#243A69' }]} />
+        <View style={[styles.image, { backgroundColor: '#243A69', borderRadius: 60 }]} />
       )}
 
       <View style={styles.inputGroup}>
         <Text style={styles.label}>Usuário</Text>
-        <TextInput
-          style={styles.input}
-          onChangeText={setUsuario} // ← salvando no contexto
+        <TextInput 
+          style={styles.input} 
+          onChangeText={setUsuario} 
+          value={usuario}
         />
       </View>
 
@@ -67,7 +62,6 @@ export default function SegundaTela() {
   );
 }
 
-// ... resto do código da sua SegundaTela
 
 const styles = StyleSheet.create({
   container: {
@@ -77,6 +71,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#243A69',
     gap: 25,
     paddingHorizontal: 20,
+    /*width: 426,
+    alignSelf: 'center' */
   },
   image: {
     width: 120,
@@ -124,7 +120,7 @@ const styles = StyleSheet.create({
     color: '#D4CDC5',
   },
   mode: {
-    backgroundColor: '#D4CDC5',
+    backgroundColor: "#D4CDC5",
     width: 50,
     height: 50,
     borderRadius: 15,
@@ -132,6 +128,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignSelf: 'flex-end',
     marginTop: -25,
-    marginRight: 45,
-  },
+    marginRight:45
+  }
 });

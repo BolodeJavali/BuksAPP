@@ -1,63 +1,61 @@
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, Text, TextInput, View } from 'react-native';
+import { useUser } from '../context/UserContext'; // usa o contexto certo
 
 export default function QuartaTela() {
   const router = useRouter();
-  const [usuario, setusuario] = useState('');
+  const { usuario, setUsuario, avatarUrl } = useUser(); // usa o estado global
 
-  const imageUrl = 'https://api.dicebear.com/9.x/initials/png?seed=' + usuario + '&padding=20';
+  return (
+    <View style={styles.container}>
+      <View style={styles.mode}>
+        <Pressable onPress={() => router.push('/quarta-tela-e')}>
+          <Image
+            source={require('../assets/images/moon.png')}
+            style={styles.image1}
+            contentFit="cover"
+          />
+        </Pressable>
+      </View>
 
-return (   
-  <View style={styles.container}>
-    <View style={styles.mode}>
-      <Pressable onPress={() => router.push('/primeira-tela-e')}>
-        <Image
-          source={require('../assets/images/moon.png')}
-          style={styles.image1}
-          contentFit="cover"
-        />
-      </Pressable>
+      {usuario ? (
+        <Image source={{ uri: avatarUrl }} style={styles.image} contentFit="cover" />
+      ) : (
+        <View style={[styles.image, { backgroundColor: '#243A69', borderRadius: 60 }]} />
+      )}
+
+      <View style={styles.inputGroup}>
+        <Text style={styles.label}>Usuário</Text>
+        <TextInput onChangeText={setUsuario} value={usuario} style={styles.input} />
+      </View>
+
+      <View style={styles.inputGroup}>
+        <Text style={styles.label}>Senha</Text>
+        <TextInput style={styles.input} secureTextEntry />
+      </View>
+
+      <View style={styles.inputGroup}>
+        <Text style={styles.label}>Confirme sua senha</Text>
+        <TextInput style={styles.input} secureTextEntry />
+      </View>
+
+      <View style={styles.enter}>
+        <Pressable onPress={() => router.push('/terceira_tela')}>
+          <Image
+            source={require('../assets/images/arrow.png')}
+            style={styles.image1}
+            contentFit="cover"
+          />
+        </Pressable>
+      </View>
     </View>
-
-    {usuario ? (
-      <Image
-        source={{ uri: imageUrl }}
-        style={styles.image}
-        contentFit="cover"
-      />
-    ) : (
-      <View style={[styles.image, { backgroundColor: '#243A69', borderRadius: 60 }]} />
-    )}
-
-    <View style={styles.inputGroup}>
-      <Text style={styles.label}>Usuário</Text>
-      <TextInput onChangeText={setusuario} style={styles.input} />
-    </View>
-
-    <View style={styles.inputGroup}>
-      <Text style={styles.label}>Senha</Text>
-      <TextInput style={styles.input} secureTextEntry />
-    </View>
-
-    <View style={styles.inputGroup}>
-      <Text style={styles.label}>Confirme sua senha</Text>
-      <TextInput style={styles.input} secureTextEntry />
-    </View>
-
-    <View style={styles.enter}>
-      <Pressable onPress={() => router.push('/terceira_tela')}>
-        <Image
-          source={require('../assets/images/arrow.png')}
-          style={styles.image1}
-          contentFit="cover"
-        />
-      </Pressable>
-    </View>
-  </View>
-);
+  );
 }
+
+import { StyleSheet } from 'react-native'; // certifique-se de importar isso no topo se ainda não fez
+
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -66,8 +64,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#243A69',
     gap: 25,
     paddingHorizontal: 20,
-    //width: 426,
-    //alignSelf: 'center' 
   },
   image: {
     width: 120,
@@ -113,6 +109,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignSelf: 'flex-end',
     marginTop: -25,
-    marginRight:45
-  }
+    marginRight: 45,
+  },
 });

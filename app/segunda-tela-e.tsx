@@ -1,35 +1,31 @@
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-
+import { useUser } from '../context/UserContext';
 export default function SegundaTela() {
   const router = useRouter(); 
-  const [usuario, setUsuario] = useState('');
-
-  const imageUrl = 'https://api.dicebear.com/9.x/initials/png?seed=' + usuario + '&padding=20';
+  const { usuario, setUsuario, avatarUrl } = useUser(); 
 
   return (
     <View style={styles.container}>
-  
       <View style={styles.mode}>
-        <Pressable onPress={() => router.push('/')}>
+        <Pressable onPress={() => router.push('/segunda-tela')}>
           <Image
-            source={require('../assets/images/sun.png')}
-            style={styles.image1}
-            contentFit="cover"
+              source={require('../assets/images/moon.png')}
+              style={styles.image1}
+              contentFit="cover"
           />
-        </Pressable>
+          </Pressable>
       </View>
+
       {usuario ? (
         <Image
-            source={{ uri: imageUrl }}
-            style={styles.image}
-            contentFit="cover"
+          source={{ uri: avatarUrl }}
+          style={styles.image}
+          contentFit="cover"
         />
-
       ) : (
-        <View style={[styles.image, { backgroundColor: '#191013', borderRadius: 60 , alignItems: 'center',}]} />
+        <View style={[styles.image, { backgroundColor: '#191013'}]} />
       )}
 
       <View style={styles.inputGroup}>
@@ -37,9 +33,10 @@ export default function SegundaTela() {
         <TextInput 
           style={styles.input} 
           onChangeText={setUsuario} 
+          value={usuario}
         />
       </View>
-  
+
       <View style={styles.inputGroup}>
         <Text style={styles.label}>Senha</Text>
         <TextInput style={styles.input} secureTextEntry />
@@ -65,6 +62,7 @@ export default function SegundaTela() {
   );
 }
 
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -73,8 +71,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#191013',
     gap: 25,
     paddingHorizontal: 20,
-    //width: 426,
-    //alignSelf: 'center' 
+    /*width: 426,
+    alignSelf: 'center' */
   },
   image: {
     width: 120,
