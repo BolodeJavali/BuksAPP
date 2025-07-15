@@ -1,11 +1,48 @@
+import React, { useState } from 'react';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
-import { Pressable, Text, TextInput, View } from 'react-native';
-import { useUser } from '../context/UserContext'; // usa o contexto certo
+import { Pressable, Text, TextInput, View, StyleSheet, Alert } from 'react-native';
+import { useUser } from '../context/UserContext';
 
-export default function QuartaTela() {
+interface Usuario {
+  nome?: string;
+}
+
+export default function QuartaTelaEscura() {
   const router = useRouter();
-  const { usuario, setUsuario, avatarUrl } = useUser(); // usa o estado global
+  const { usuario, setUsuario, avatarUrl } = useUser();
+  
+  const [senha, setSenha] = useState('');
+  const [confirmaSenha, setConfirmaSenha] = useState('');
+  
+  const handleEntrar = () => {
+    if (!usuario?.nome) {
+      Alert.alert('Campo obrigatório', 'Preencha o campo de usuário');
+      return;
+    }
+    
+    if (!senha || !confirmaSenha) {
+      Alert.alert('Campos obrigatórios', 'Preencha os campos de senha');
+      return;
+    }
+    
+    if (senha !== confirmaSenha) {
+      Alert.alert('Senhas diferentes', 'As senhas não coincidem');
+      return;
+    }
+    
+    Alert.alert('Sucesso', 'Informações salvas com sucesso!', [
+      { text: 'OK', onPress: () => router.push('/terceira-tela-e') }
+    ]);
+  };
+
+  if (!setUsuario) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.label}>Erro ao carregar o contexto do usuário</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -19,29 +56,53 @@ export default function QuartaTela() {
         </Pressable>
       </View>
 
-      {usuario ? (
-        <Image source={{ uri: avatarUrl }} style={styles.image} contentFit="cover" />
+      {usuario?.nome && avatarUrl ? (
+        <Image 
+          source={{ uri: avatarUrl }} 
+          style={styles.image} 
+          contentFit="cover"
+        />
       ) : (
         <View style={[styles.image, { backgroundColor: '#243A69', borderRadius: 60 }]} />
       )}
 
       <View style={styles.inputGroup}>
         <Text style={styles.label}>Usuário</Text>
-        <TextInput onChangeText={setUsuario} value={usuario} style={styles.input} />
+        <TextInput 
+          onChangeText={(nome) => setUsuario({ ...(usuario || {}), nome } as Usuario)}
+          value={usuario?.nome || ''}
+          style={styles.input}
+          placeholder="Digite seu nome de usuário"
+          placeholderTextColor="#999"
+        />
       </View>
 
       <View style={styles.inputGroup}>
         <Text style={styles.label}>Senha</Text>
-        <TextInput style={styles.input} secureTextEntry />
+        <TextInput 
+          style={styles.input} 
+          secureTextEntry 
+          value={senha}
+          onChangeText={setSenha}
+          placeholder="Digite sua senha"
+          placeholderTextColor="#999"
+        />
       </View>
 
       <View style={styles.inputGroup}>
         <Text style={styles.label}>Confirme sua senha</Text>
-        <TextInput style={styles.input} secureTextEntry />
+        <TextInput 
+          style={styles.input} 
+          secureTextEntry
+          value={confirmaSenha}
+          onChangeText={setConfirmaSenha}
+          placeholder="Digite novamente sua senha"
+          placeholderTextColor="#999"
+        />
       </View>
 
       <View style={styles.enter}>
-        <Pressable onPress={() => router.push('/terceira-tela-e')}>
+        <Pressable onPress={handleEntrar}>
           <Image
             source={require('../assets/images/arrow.png')}
             style={styles.image1}
@@ -53,31 +114,29 @@ export default function QuartaTela() {
   );
 }
 
-import { StyleSheet } from 'react-native'; // certifique-se de importar isso no topo se ainda não fez
-
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#191013',
-    gap: 25,
     paddingHorizontal: 20,
   },
   image: {
     width: 120,
     height: 120,
+    marginBottom: 25, 
   },
   inputGroup: {
     width: '100%',
     maxWidth: 300,
-    gap: 5,
+    marginBottom: 25, 
   },
   label: {
     color: '#D4CDC5',
     fontSize: 12,
     paddingLeft: 10,
+    marginBottom: 5, 
   },
   input: {
     backgroundColor: '#D4CDC5',

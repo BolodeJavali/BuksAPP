@@ -1,11 +1,27 @@
+import React, { useState } from 'react';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
-import { Pressable, Text, TextInput, View } from 'react-native';
-import { useUser } from '../context/UserContext'; // usa o contexto certo
+import { Pressable, Text, TextInput, View, StyleSheet } from 'react-native';
+import { useUser } from '../context/UserContext';
 
 export default function QuartaTela() {
   const router = useRouter();
-  const { usuario, setUsuario, avatarUrl } = useUser(); // usa o estado global
+  const { usuario, setUsuario, avatarUrl } = useUser();
+
+  const [senha, setSenha] = useState('');
+  const [confirmaSenha, setConfirmaSenha] = useState('');
+
+  const handleEntrar = () => {
+    if (!usuario?.nome || !senha || !confirmaSenha) {
+      alert('Preencha todos os campos');
+      return;
+    }
+    if (senha !== confirmaSenha) {
+      alert('As senhas não coincidem');
+      return;
+    }
+    router.push('/terceira_tela');
+  };
 
   return (
     <View style={styles.container}>
@@ -19,7 +35,7 @@ export default function QuartaTela() {
         </Pressable>
       </View>
 
-      {usuario ? (
+      {usuario?.nome && avatarUrl ? (
         <Image source={{ uri: avatarUrl }} style={styles.image} contentFit="cover" />
       ) : (
         <View style={[styles.image, { backgroundColor: '#243A69', borderRadius: 60 }]} />
@@ -27,21 +43,35 @@ export default function QuartaTela() {
 
       <View style={styles.inputGroup}>
         <Text style={styles.label}>Usuário</Text>
-        <TextInput onChangeText={setUsuario} value={usuario} style={styles.input} />
+        <TextInput
+          onChangeText={nome => setUsuario({ ...(usuario || {}), nome })}
+          value={usuario?.nome || ''}
+          style={styles.input}
+        />
       </View>
 
       <View style={styles.inputGroup}>
         <Text style={styles.label}>Senha</Text>
-        <TextInput style={styles.input} secureTextEntry />
+        <TextInput
+          style={styles.input}
+          secureTextEntry
+          value={senha}
+          onChangeText={setSenha}
+        />
       </View>
 
       <View style={styles.inputGroup}>
         <Text style={styles.label}>Confirme sua senha</Text>
-        <TextInput style={styles.input} secureTextEntry />
+        <TextInput
+          style={styles.input}
+          secureTextEntry
+          value={confirmaSenha}
+          onChangeText={setConfirmaSenha}
+        />
       </View>
 
       <View style={styles.enter}>
-        <Pressable onPress={() => router.push('/terceira_tela')}>
+        <Pressable onPress={handleEntrar}>
           <Image
             source={require('../assets/images/arrow.png')}
             style={styles.image1}
@@ -52,9 +82,6 @@ export default function QuartaTela() {
     </View>
   );
 }
-
-import { StyleSheet } from 'react-native'; // certifique-se de importar isso no topo se ainda não fez
-
 
 const styles = StyleSheet.create({
   container: {

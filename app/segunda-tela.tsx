@@ -1,7 +1,9 @@
+import React from 'react';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useUser } from '../context/UserContext';
+
 export default function SegundaTela() {
   const router = useRouter(); 
   const { usuario, setUsuario, avatarUrl } = useUser(); 
@@ -15,10 +17,10 @@ export default function SegundaTela() {
               style={styles.image1}
               contentFit="cover"
           />
-          </Pressable>
+        </Pressable>
       </View>
 
-      {usuario ? (
+      {usuario?.nome ? (
         <Image
           source={{ uri: avatarUrl }}
           style={styles.image}
@@ -32,18 +34,21 @@ export default function SegundaTela() {
         <Text style={styles.label}>Usuário</Text>
         <TextInput 
           style={styles.input} 
-          onChangeText={setUsuario} 
-          value={usuario}
+          onChangeText={(nome) => setUsuario({ ...(usuario || {}), nome })}
+          value={usuario?.nome || ''}
         />
       </View>
 
       <View style={styles.inputGroup}>
         <Text style={styles.label}>Senha</Text>
-        <TextInput style={styles.input} secureTextEntry />
+        <TextInput 
+          style={styles.input} 
+          secureTextEntry 
+        />
       </View>
 
       <View style={styles.enter}>
-        <Pressable onPress={() => router.push('/terceira_tela')}>
+        <Pressable onPress={() => router.push('/terceira-tela')}>
           <Image
             source={require('../assets/images/arrow.png')}
             style={styles.image1}
@@ -62,31 +67,29 @@ export default function SegundaTela() {
   );
 }
 
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#243A69',
-    gap: 25,
     paddingHorizontal: 20,
-    /*width: 426,
-    alignSelf: 'center' */
   },
   image: {
     width: 120,
     height: 120,
+    marginBottom: 25, 
   },
   inputGroup: {
     width: '100%',
     maxWidth: 300,
-    gap: 5,
+    marginBottom: 25, 
   },
   label: {
     color: '#D4CDC5',
     fontSize: 12,
     paddingLeft: 10,
+    marginBottom: 5, 
   },
   input: {
     backgroundColor: '#D4CDC5',
@@ -103,7 +106,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     alignSelf: 'center',
-    marginBottom: -15,
+    marginBottom: 15,
   },
   image1: {
     width: 30,
@@ -111,13 +114,13 @@ const styles = StyleSheet.create({
   },
   group: {
     alignItems: 'center',
-    gap: 5,
     marginTop: 15,
   },
   textoBotao: {
     textDecorationLine: 'underline',
     fontSize: 12,
     color: '#D4CDC5',
+    marginTop: 5, 
   },
   mode: {
     backgroundColor: "#D4CDC5",
@@ -128,6 +131,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignSelf: 'flex-end',
     marginTop: -25,
-    marginRight:45
+    marginRight: 45
   }
 });
