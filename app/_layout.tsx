@@ -43,7 +43,7 @@ export default function RootLayout() {
     <ErrorBoundary>
       <StatusBar style="light" backgroundColor="#243A69" />
       <UserProvider>
-        <Slot /> {}
+        <Slot />
       </UserProvider>
     </ErrorBoundary>
   );
