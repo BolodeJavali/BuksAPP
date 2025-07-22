@@ -2,30 +2,45 @@ import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
   FlatList,
-  Image,
+  ActivityIndicator,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
-  View
+  View,
+  Alert
 } from 'react-native';
+import { Image } from 'expo-image';
 import { useUser } from '../context/UserContext';
 
+// Interface para tipagem dos livros
+interface Livro {
+  id: string;
+  volumeInfo: {
+    title: string;
+    authors?: string[];
+    description?: string;
+    imageLinks?: {
+      thumbnail?: string;
+    };
+  };
+}
 
 const categorias = [
   'Ação', 'Aventura', 'Biografia', 'Clássico', 'Comédia', 'Conto',
 ];
 
-export default function TerceiraTela() {
+export default function TerceiraTelaE() {
   const { usuario, avatarUrl } = useUser(); 
   const router = useRouter();
+  
+  // Log para debugging
+  console.log("Dados do usuário na terceira-tela-e:", usuario);
 
   const [query, setQuery] = useState('');
-  const [resultadosBusca, setResultadosBusca] = useState([]);
-  const [livrosPorCategoria, setLivrosPorCategoria] = useState({});
-
-  const imageUrl = 'https://api.dicebear.com/9.x/initials/png?seed=' + (usuario || 'Anon') + '&padding=20';
+  const [resultadosBusca, setResultadosBusca] = useState<Livro[]>([]);
+  const [livrosPorCategoria, setLivrosPorCategoria] = useState<Record<string, Livro[]>>({});
+  const [isLoading, setIsLoading] = useState(true);
 
   const buscarLivros = async (termo: string) => {
     try {
@@ -42,12 +57,22 @@ export default function TerceiraTela() {
 
   useEffect(() => {
     const carregarCategorias = async () => {
-      const resultados = {};
-      for (const categoria of categorias) {
-        const livros = await buscarLivros(categoria);
-        resultados[categoria] = livros;
+      setIsLoading(true);
+      try {
+        const resultados: Record<string, Livro[]> = {};
+        // Carrega apenas 3 categorias inicialmente para melhor performance
+        const categoriasIniciais = categorias.slice(0, 3);
+        for (const categoria of categoriasIniciais) {
+          const livros = await buscarLivros(categoria);
+          resultados[categoria] = livros;
+        }
+        setLivrosPorCategoria(resultados);
+      } catch (error) {
+        console.error('Erro ao carregar categorias:', error);
+        Alert.alert('Erro', 'Não foi possível carregar as categorias de livros.');
+      } finally {
+        setIsLoading(false);
       }
-      setLivrosPorCategoria(resultados);
     };
 
     carregarCategorias();
@@ -64,21 +89,38 @@ export default function TerceiraTela() {
       setResultadosBusca(livros);
     };
 
-    buscar();
+    // Adiciona um pequeno delay para não fazer muitas requisições enquanto digita
+    const timeoutId = setTimeout(buscar, 500);
+    return () => clearTimeout(timeoutId);
   }, [query]);
+
+  const navegarParaDetalhes = (id: string) => {
+    try {
+      router.push({ pathname: '/detalhes/[id]', params: { id } });
+    } catch (error) {
+      console.error('Erro na navegação:', error);
+      Alert.alert('Erro', 'Não foi possível abrir os detalhes deste livro.');
+    }
+  };
 
   return (
     <View style={styles.container}>
       <View style={styles.setusuario}>
         <View style={styles.usuarioInfo}>
-          <Image source={{ uri: avatarUrl }} style={styles.avatar} contentFit="cover" />
-      <Text style={styles.texto}>Bem-vindo, {usuario}!</Text>
-      
-    </View>
-
+          {avatarUrl ? (
+            <Image source={{ uri: avatarUrl }} style={styles.avatar} contentFit="cover" />
+          ) : (
+            <View style={[styles.avatar, { backgroundColor: '#333' }]} />
+          )}
+          <Text style={styles.texto}>Bem-vindo, {usuario?.nome || 'visitante'}!</Text>
+        </View>
 
         <View style={styles.mode}>
-          <Pressable onPress={() => router.push('/terceira_tela')}>
+          <Pressable 
+            onPress={() => router.push('/terceira-tela')}
+            accessible={true}
+            accessibilityLabel="Alternar para modo claro"
+          >
             <Image
               source={require('../assets/images/sun.png')}
               style={styles.image1}
@@ -98,49 +140,69 @@ export default function TerceiraTela() {
         />
       </View>
 
-      <ScrollView style={styles.scroll}>
-  {query.trim() !== '' && resultadosBusca.length > 0 && (
-    <View style={styles.categoria}>
-      <Text style={styles.categoriaTitulo}>Resultados da busca</Text>
-      <FlatList
-        data={resultadosBusca}
-        keyExtractor={(item) => item.id}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        renderItem={({ item }) => {
-          const volume = item.volumeInfo;
-          return volume.imageLinks?.thumbnail ? (
-            <Image
-              source={{ uri: volume.imageLinks.thumbnail }}
-              style={styles.livroCapa}
-            />
-          ) : null;
-        }}
-      />
-    </View>
-  )}
+      {/* Indicador de carregamento */}
+      {isLoading && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#D4CDC5" />
+          <Text style={styles.loadingText}>Carregando livros...</Text>
+        </View>
+      )}
 
-  {categorias.map((categoria) => (
-    <View key={categoria} style={styles.categoria}>
-      <Text style={styles.categoriaTitulo}>{categoria}</Text>
+      {/* Mensagem de busca sem resultados */}
+      {!isLoading && query.trim() !== '' && resultadosBusca.length === 0 && (
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyStateText}>
+            Nenhum resultado encontrado para "{query}"
+          </Text>
+        </View>
+      )}
+
       <FlatList
-        data={livrosPorCategoria[categoria] || []}
+        data={[
+          ...(query.trim() !== '' && resultadosBusca.length > 0 
+            ? [{ id: 'resultados', titulo: 'Resultados da busca', dados: resultadosBusca }] 
+            : []),
+          ...categorias.map(categoria => ({ 
+            id: categoria, 
+            titulo: categoria, 
+            dados: livrosPorCategoria[categoria] || [] 
+          }))
+        ]}
         keyExtractor={(item) => item.id}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        renderItem={({ item }) => {
-          const volume = item.volumeInfo;
-          return volume.imageLinks?.thumbnail ? (
-            <Image
-              source={{ uri: volume.imageLinks.thumbnail }}
-              style={styles.livroCapa}
+        renderItem={({ item }) => (
+          <View style={styles.categoria}>
+            <Text style={styles.categoriaTitulo}>{item.titulo}</Text>
+            <FlatList
+              data={item.dados}
+              keyExtractor={(livro, index) => livro?.id || `livro-${index}`}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              renderItem={({ item: livro }) => {
+                const volume = livro?.volumeInfo;
+                return volume?.imageLinks?.thumbnail ? (
+                  <Pressable 
+                    onPress={() => navegarParaDetalhes(livro.id)}
+                    accessible={true}
+                    accessibilityLabel={`Livro: ${volume.title || 'Sem título'}`}
+                    accessibilityHint="Toque para ver detalhes do livro"
+                  >
+                    <Image
+                      source={{ uri: volume.imageLinks.thumbnail }}
+                      style={styles.livroCapa}
+                      contentFit="cover"
+                    />
+                  </Pressable>
+                ) : null;
+              }}
+              ListEmptyComponent={
+                !isLoading && (
+                  <Text style={styles.emptyListText}>Nenhum livro encontrado</Text>
+                )
+              }
             />
-          ) : null;
-        }}
+          </View>
+        )}
       />
-    </View>
-  ))}
-</ScrollView>
     </View>
   );
 }
@@ -160,11 +222,11 @@ const styles = StyleSheet.create({
   usuarioInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
   },
   avatar: {
     width: 80,
     height: 80,
+    marginRight: 12, // Adicionado para substituir o gap
   },
   nome: {
     fontSize: 16,
@@ -193,11 +255,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 8,
   },
-  scroll: {
-    paddingHorizontal: 16,
-  },
   categoria: {
     marginBottom: 20,
+    paddingHorizontal: 16,
   },
   categoriaTitulo: {
     fontSize: 16,
@@ -213,6 +273,28 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   texto: {
-    color: '#D4CDC5'
+    color: '#D4CDC5',
+    fontSize: 16,
+  },
+  loadingContainer: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  loadingText: {
+    color: '#D4CDC5',
+    marginTop: 10,
+  },
+  emptyState: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  emptyStateText: {
+    color: '#D4CDC5',
+    textAlign: 'center',
+  },
+  emptyListText: {
+    color: '#D4CDC5',
+    fontStyle: 'italic',
+    padding: 10,
   }
 });

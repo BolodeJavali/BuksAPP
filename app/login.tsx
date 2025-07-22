@@ -1,12 +1,13 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, StyleSheet, Pressable, TextInput, Alert } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { View, Text, StyleSheet, Pressable, TextInput, Alert, ActivityIndicator } from 'react-native';
+import { useLocalSearchParams, useRouter, Link } from 'expo-router';
+import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from './firebase';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
+  const [loading, setLoading] = useState(false);
   const params = useLocalSearchParams();
   const router = useRouter();
   const emailInputRef = useRef<TextInput>(null);
@@ -25,6 +26,8 @@ export default function LoginScreen() {
       Alert.alert('Erro', 'Preencha todos os campos');
       return;
     }
+
+    setLoading(true); 
 
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, senha);
@@ -45,7 +48,25 @@ export default function LoginScreen() {
       }
       
       Alert.alert('Erro', mensagem);
+    } finally {
+      setLoading(false); 
     }
+  };
+
+  const handleResetPassword = () => {
+    if (!email) {
+      Alert.alert('Digite seu e-mail', 'Informe seu e-mail para recuperar sua senha');
+      return;
+    }
+
+    sendPasswordResetEmail(auth, email)
+      .then(() => {
+        Alert.alert('E-mail enviado', 'Verifique sua caixa de entrada para redefinir sua senha');
+      })
+      .catch((error) => {
+        Alert.alert('Erro', 'Não foi possível enviar o e-mail de redefinição');
+        console.error(error);
+      });
   };
 
   return (
@@ -87,12 +108,38 @@ export default function LoginScreen() {
         secureTextEntry
       />
       
+      {loading ? (
+        <ActivityIndicator size="large" color="#fff" style={{marginTop: 20}} />
+      ) : (
+        <Pressable 
+          style={styles.loginButtonLarge}
+          onPress={handleLogin}
+        >
+          <Text style={styles.loginButtonText}>Entrar</Text>
+        </Pressable>
+      )}
+      
       <Pressable 
-        style={styles.loginButtonLarge}
-        onPress={handleLogin}
+        style={styles.forgotPassword}
+        onPress={handleResetPassword}
       >
-        <Text style={styles.loginButtonText}>Entrar</Text>
+        <Text style={styles.forgotPasswordText}>Esqueci minha senha</Text>
       </Pressable>
+      
+      <View style={styles.registerContainer}>
+        <Text style={styles.registerText}>Não tem uma conta? </Text>
+        <Pressable onPress={() => {
+          console.log('Tentando navegar para CadastroScreen...');
+          try {
+            router.push('/CadastroScreen');
+          } catch (error) {
+            console.error('Erro na navegação:', error);
+            Alert.alert('Erro', 'Não foi possível navegar para a tela de cadastro.');
+          }
+        }}>
+          <Text style={styles.registerLink}>Cadastre-se</Text>
+        </Pressable>
+      </View>
     </View>
   );
 }
@@ -157,4 +204,24 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
   },
+  forgotPassword: {
+    marginTop: 20,
+  },
+  forgotPasswordText: {
+    color: '#fff',
+    textDecorationLine: 'underline',
+  },
+  registerContainer: {
+    flexDirection: 'row',
+    marginTop: 30,
+    alignItems: 'center',
+  },
+  registerText: {
+    color: '#fff',
+  },
+  registerLink: {
+    color: '#fff',
+    fontWeight: 'bold',
+    textDecorationLine: 'underline',
+  }
 });

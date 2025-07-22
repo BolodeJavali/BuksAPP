@@ -1,8 +1,15 @@
+import React from 'react';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useUser } from '../context/UserContext';
-export default function SegundaTela() {
+
+// Definir interface para o tipo de usuário
+interface Usuario {
+  nome?: string;
+}
+
+export default function SegundaTelaEscura() {  // Nome mais descritivo
   const router = useRouter(); 
   const { usuario, setUsuario, avatarUrl } = useUser(); 
 
@@ -15,25 +22,25 @@ export default function SegundaTela() {
               style={styles.image1}
               contentFit="cover"
           />
-          </Pressable>
+        </Pressable>
       </View>
 
-      {usuario ? (
+      {usuario?.nome && avatarUrl ? (  // Verificação corrigida
         <Image
           source={{ uri: avatarUrl }}
           style={styles.image}
           contentFit="cover"
         />
       ) : (
-        <View style={[styles.image, { backgroundColor: '#191013'}]} />
+        <View style={[styles.image, { backgroundColor: '#191013', borderRadius: 60 }]} />
       )}
 
       <View style={styles.inputGroup}>
         <Text style={styles.label}>Usuário</Text>
         <TextInput 
           style={styles.input} 
-          onChangeText={setUsuario} 
-          value={usuario}
+          onChangeText={(nome) => setUsuario({ ...(usuario || {}), nome })}  // Correção aqui
+          value={usuario?.nome || ''}  // E aqui
         />
       </View>
 

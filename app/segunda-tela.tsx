@@ -4,6 +4,11 @@ import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useUser } from '../context/UserContext';
 
+// Adicionar interface para tipagem
+interface Usuario {
+  nome?: string;
+}
+
 export default function SegundaTela() {
   const router = useRouter(); 
   const { usuario, setUsuario, avatarUrl } = useUser(); 
@@ -20,7 +25,8 @@ export default function SegundaTela() {
         </Pressable>
       </View>
 
-      {usuario?.nome ? (
+      {/* Melhorar verificação para incluir avatarUrl */}
+      {usuario?.nome && avatarUrl ? (
         <Image
           source={{ uri: avatarUrl }}
           style={styles.image}
@@ -34,8 +40,10 @@ export default function SegundaTela() {
         <Text style={styles.label}>Usuário</Text>
         <TextInput 
           style={styles.input} 
-          onChangeText={(nome) => setUsuario({ ...(usuario || {}), nome })}
+          onChangeText={(nome) => setUsuario({ ...(usuario || {}), nome } as Usuario)}
           value={usuario?.nome || ''}
+          placeholder="Digite seu nome de usuário"
+          placeholderTextColor="#999"
         />
       </View>
 
@@ -44,6 +52,8 @@ export default function SegundaTela() {
         <TextInput 
           style={styles.input} 
           secureTextEntry 
+          placeholder="Digite sua senha"
+          placeholderTextColor="#999"
         />
       </View>
 
